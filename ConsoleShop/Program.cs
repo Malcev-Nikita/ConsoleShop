@@ -32,6 +32,7 @@ namespace ConsoleShop
                         break;
 
                     case ConsoleKey.D3:
+                        Orders();
                         break;
 
                     default:
@@ -108,7 +109,55 @@ namespace ConsoleShop
 
             } while (true);
 
-        end_switch:;
+            end_switch:;
+        }
+
+        static void Orders()
+        {
+            var res = Constant.context.Order.GroupBy(x => x.Status).Select(x => new { Status = x.Key, Count = x.Count() }).ToList();
+
+            int page = 0;
+            int pageSize = 3;
+            double pageCount = Math.Ceiling(res.Count() / 3.0);
+            int i = 1;
+
+            do
+            {
+                Console.Clear();
+                Console.WriteLine($"- - - - - - - - - - Заказы - Страница №{page + 1}  - - - - - - - - - -");
+                var itemPerPage = res.Skip(page * pageSize).Take(pageSize);
+
+                foreach (var item in itemPerPage)
+                {
+                    Console.WriteLine($"{item.Status} {item.Count}");
+                    i++;
+                }
+
+                Console.WriteLine("\n<- Назад - - 0: Выход - - Вперёд ->");
+
+                var key = Console.ReadKey().Key;
+
+                switch (key)
+                {
+                    case ConsoleKey.LeftArrow when page > 0:
+                        i = 1;
+                        page--;
+                        break;
+
+                    case ConsoleKey.RightArrow when page < pageCount - 1:
+                        page++;
+                        break;
+
+                    case ConsoleKey.D0: goto end_switch;
+
+                    default:
+                        i -= itemPerPage.Count();
+                        continue;
+                }
+
+            } while (true);
+
+            end_switch:;
         }
 
         static void OutputClient(int id)
